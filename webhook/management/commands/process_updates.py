@@ -2,9 +2,11 @@ from django.core.management.base import BaseCommand
 from bot import settings
 import telepot, time, urllib3, logging, pprint
 from webhook.parsers import ParserDefault
-from webhook.commands import CampaignStats
+from webhook.command_factory import CommandFactory
+from webhook.telegram_update import TelegramUpdate
+
 from webhook.models import TeleUser
-from webhook.exceptions import CmdException
+
 
 if settings.IS_PYTHONANYWERE:
     proxy_url = "http://proxy.server:3128"
@@ -23,58 +25,44 @@ class Command(BaseCommand):
         super(Command, self).__init__()
         self.parsersList = []
         self.parsersList.append(ParserDefault())
-        self.commands = []
-        self.commands.append(CampaignStats())
 
-    def handle(self):
+    def handle(self, *args, **options):
         offset = None
+        cmd_factory = CommandFactory()
         while 1:
-            updates = TelegramBot.getUpdates(offset)
+            updates = self.get_telegram_updates(offset)
+
             for update in updates:
-                offset = update['update_id'] + 1
+
+                offset = update.id + 1
 
                 response_message = None
-                #logger = logging.getLogger('bot_log')
-                #logger.info(pprint.pformat(update))
-                update_key = "message"
-                try:
-                    update[update_key]
-                except KeyError:
-                    update_key = "edited_message"
 
-                update_message = update[update_key]['text']
-                update_chat_id = update[update_key]['chat']['id']
+                user = self.fetch_or_create_user(update.user_id)
 
-                try:
-                    result = self.run_command(update_message)
-                    if result:
-                        response_message = "Done!"
-                except CmdException as e:
-                    response_message = str(e)
+                cmd = cmd_factory.create_cmd(update.message, user)
+                if cmd is not None:
+                    response_message = cmd.run(update.message)
 
                 if response_message is None:
-                    response_message = self.answer_text_message(update_message)
+                    response_message = self.answer_text_message(update.message)
 
-                TelegramBot.sendMessage(update_chat_id, response_message)
+                if response_message is None:
+                    response_message = "I don't understand you. But you are able to use commands:"\
+                                       + cmd_factory.get_help_str()
+
+                TelegramBot.sendMessage(update.chat_id, response_message)
 
             #break
             time.sleep(10)
 
-    def run_command(self, textCmd):
-        """
-        Find acceptable command and run it
+    def get_telegram_updates(self, offset):
+        updates = TelegramBot.getUpdates(offset)
+        telegram_updates = []
+        for update in updates:
+            telegram_updates.append(TelegramUpdate(update))
 
-        :param textCmd: Message text came from update
-        :return: bool
-        """
-        for Cmd in self.commands:
-            if Cmd.is_acceptable(textCmd):
-                errors = Cmd.validate(textCmd)
-                if errors:
-                    raise CmdException(errors.pop())
-                Cmd.run(textCmd)
-                return True
-        return False
+        return telegram_updates
 
     def answer_text_message(self, message):
         """
@@ -88,20 +76,20 @@ class Command(BaseCommand):
             response_message = parser.parse(message)
             if response_message is not None:
                 break
-        if response_message is None:
-            response_message = "I don't understand you. But you are able to use commands:" + self.get_help_str()
 
         return response_message
 
-    def get_help_str(self):
+    def fetch_or_create_user(self, telegram_user_id):
         """
-        Get list of commands
-
-        :return: string
+        Fetch or create user
+        :param telegram_user_id: int
+        :return: TeleUser
         """
-        cmd_list = []
-        for Cmd in self.commands:
-            cmd_list.append(Cmd.CMD_NAME)
-        response = "\n\t".join(cmd_list)
+        try:
+            user = TeleUser.objects.get(telegram_id=telegram_user_id)
+        except TeleUser.DoesNotExist:
+            user = TeleUser()
+            user.telegram_id = telegram_user_id
+            user.save()
 
-        return response
+        return user
