@@ -2,4 +2,4 @@
 *settings.py
 db\.sqlite3
 bot/__pycache__
-webhook/__pycache__
+api/__pycache__

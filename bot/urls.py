@@ -5,8 +5,5 @@ admin.autodiscover()
 
 urlpatterns = [
     # Examples:
-    # url(r'^$', 'bot.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-    url(r'^webhook/', include('webhook.urls')),
     url(r'^admin/', include(admin.site.urls)),
 ]
