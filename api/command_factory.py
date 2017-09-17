@@ -2,6 +2,8 @@ from api.api_commands.campaign_stats import CampaignStats
 from api.api_commands.campaigns import Campaigns
 from api.api_commands.set_api_key import SetApiKey
 from api.api_commands.save_phone import SavePhone
+from api.api_commands.get_lists import GetLists
+from api.api_commands.subscribe import Subscribe
 from pprint import pprint
 
 class CommandFactory:
@@ -11,6 +13,8 @@ class CommandFactory:
         self.commands.append(CampaignStats())
         self.commands.append(Campaigns())
         self.commands.append(SetApiKey())
+        self.commands.append(GetLists())
+        self.commands.append(Subscribe())
 
     def create_cmd(self, update):
         """

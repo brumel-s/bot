@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
         if response_message is None:
             response_message = "I don't understand you. But you are able to use commands:"\
-                               + cmd_factory.get_help_str(user, cmd_factory)
+                               + self.get_help_str(cmd_factory)
 
         TelegramBot.sendMessage(update.chat_id, response_message)
 
