@@ -37,6 +37,6 @@ class Subscribe(BaseCommand):
         response = json.loads(response)
         if "error" in response.keys():
             return "Error: " + response['error']
-        pprint.pprint(response)
+
         return response['result']
 
