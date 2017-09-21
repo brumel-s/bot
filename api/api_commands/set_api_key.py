@@ -24,7 +24,7 @@ class SetApiKey(BaseCommand):
         parts = text_cmd.partition(' ')
         return parts[2]
 
-    def run(self, telegram_update, user):
+    def run(self, bot, telegram_update, user):
         text_cmd = telegram_update.message
         errors = self.validate(text_cmd)
         if errors:
@@ -33,4 +33,4 @@ class SetApiKey(BaseCommand):
         user.uni_api_key = api_key
         user.save()
 
-        return "Done!"
+        bot.sendMessage(telegram_update.chat_id, 'Апи ключ установлен')

@@ -14,7 +14,7 @@ class Subscribe(BaseCommand):
     def validate(self, text_cmd, user):
         return super(Subscribe, self).check_api_key(user)
 
-    def run(self, telegram_update, user):
+    def run(self, bot, telegram_update, user):
         text_cmd = telegram_update.message
         errors = self.validate(text_cmd, user)
         if errors:
@@ -23,10 +23,10 @@ class Subscribe(BaseCommand):
         api = super(Subscribe, self).get_api(user)
 
         subscribe_params = self.fetch_params(text_cmd)
-        text_response = self.prepare_text_response(api.run("subscribe", subscribe_params))
-        super(Subscribe, self).log_request_response(user, text_cmd, text_response)
+        response = self.prepare_text_response(api.run("subscribe", subscribe_params))
+        super(Subscribe, self).log_request_response(user, text_cmd, response)
 
-        return text_response
+        bot.sendMessage(telegram_update.chat_id, response)
 
     def fetch_params(self, text_cmd):
         if ' ' in text_cmd:

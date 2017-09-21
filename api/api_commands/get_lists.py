@@ -13,7 +13,7 @@ class GetLists(BaseCommand):
     def validate(self, text_cmd, user):
         return super(GetLists, self).check_api_key(user)
 
-    def run(self, telegram_update, user):
+    def run(self, bot, telegram_update, user):
         text_cmd = telegram_update.message
         errors = self.validate(text_cmd, user)
         if errors:
@@ -21,10 +21,10 @@ class GetLists(BaseCommand):
 
         api = super(GetLists, self).get_api(user)
 
-        text_response = self.prepare_text_response(api.run("getLists", {}))
-        super(GetLists, self).log_request_response(user, text_cmd, text_response)
+        response = self.prepare_text_response(api.run("getLists", {}))
+        super(GetLists, self).log_request_response(user, text_cmd, response)
 
-        return text_response
+        bot.sendMessage(telegram_update.chat_id, response)
 
     def prepare_text_response(self, response):
         response = json.loads(response)

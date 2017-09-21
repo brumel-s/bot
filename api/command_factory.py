@@ -4,24 +4,23 @@ from api.api_commands.set_api_key import SetApiKey
 from api.api_commands.save_phone import SavePhone
 from api.api_commands.get_lists import GetLists
 from api.api_commands.subscribe import Subscribe
-from pprint import pprint
+from api.api_commands.start import Start
 
 class CommandFactory:
 
     def __init__(self):
         self.commands = []
+        self.commands.append(Start())
         self.commands.append(CampaignStats())
         self.commands.append(Campaigns())
         self.commands.append(SetApiKey())
         self.commands.append(GetLists())
         self.commands.append(Subscribe())
 
-    def create_cmd(self, update):
-        """
-         Find acceptable command
-         :param text_cmd: Message text came from update
-         :return: Command|None
-         """
+    def create_cmd(self, update, user):
+
+        if update.phone is None and not user.phone and not user.uni_api_key:
+            return Start()
 
         if update.phone is not None:
             return SavePhone()

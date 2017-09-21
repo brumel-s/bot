@@ -10,7 +10,7 @@ class Campaigns(BaseCommand):
     """
 
     CMD_NAME = '/campaigns'
-    DATE_FORMAT = '%Y-%m-%d %H:%M:%S';
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
     def is_acceptable(self, text_cmd):
         if text_cmd.startswith(self.CMD_NAME):
@@ -20,7 +20,7 @@ class Campaigns(BaseCommand):
     def validate(self, text_cmd, user):
         return super(Campaigns, self).check_api_key(user)
 
-    def run(self, telegram_update, user):
+    def run(self, bot, telegram_update, user):
         text_cmd = telegram_update.message
         errors = self.validate(text_cmd, user)
         if errors:
@@ -29,10 +29,10 @@ class Campaigns(BaseCommand):
         api = super(Campaigns, self).get_api(user)
 
         dates = self.fetch_dates(text_cmd)
-        text_response = self.prepare_text_response(api.run("getCampaigns", dates))
-        super(Campaigns, self).log_request_response(user, text_cmd, text_response)
+        response = self.prepare_text_response(api.run("getCampaigns", dates))
+        super(Campaigns, self).log_request_response(user, text_cmd, response)
 
-        return text_response
+        bot.sendMessage(telegram_update.chat_id, response)
 
     def fetch_dates(self, text_cmd):
 

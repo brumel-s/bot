@@ -29,7 +29,7 @@ class CampaignStats(BaseCommand):
 
         return errors
 
-    def run(self, telegram_update, user):
+    def run(self, bot, telegram_update, user):
         text_cmd = telegram_update.message
         errors = self.validate(text_cmd, user)
         if errors:
@@ -37,11 +37,11 @@ class CampaignStats(BaseCommand):
         api = super(CampaignStats, self).get_api(user)
         campaign_id = self.fetch_campaign_id(text_cmd)
         response = api.run("getCampaignCommonStats", {"campaign_id": campaign_id})
-        text_response = self.prepare_text_response(response)
+        response = self.prepare_text_response(response)
 
-        super(CampaignStats, self).log_request_response(user, text_cmd, text_response)
+        super(CampaignStats, self).log_request_response(user, text_cmd, response)
 
-        return text_response
+        bot.sendMessage(telegram_update.chat_id, response)
 
     def fetch_campaign_id(self, text_cmd):
         arguments = super(CampaignStats, self).parse_arguments(text_cmd)
