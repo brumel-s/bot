@@ -2,7 +2,7 @@ from api.api_commands.base_command import BaseCommand
 import json
 from datetime import datetime, timedelta
 import pprint
-
+from api.exceptions import CmdException
 
 class Campaigns(BaseCommand):
     """
@@ -13,68 +13,88 @@ class Campaigns(BaseCommand):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
     def is_acceptable(self, text_cmd):
+        """
+        Check is command should be runned
+
+        :param cmd: string
+        :return: bool
+        """
         if text_cmd.startswith(self.CMD_NAME):
             return True
         return False
 
-    def validate(self, text_cmd, user):
-        return super(Campaigns, self).check_api_key(user)
-
     def run(self, bot, telegram_update, user):
-        text_cmd = telegram_update.message
-        errors = self.validate(text_cmd, user)
-        if errors:
-            return super(Campaigns, self).prepare_error_response(errors.pop())
+        """
+        Run command and send response to user
 
-        api = super(Campaigns, self).get_api(user)
-
-        dates = self.fetch_dates(text_cmd)
-        response = self.prepare_text_response(api.run("getCampaigns", dates))
-        super(Campaigns, self).log_request_response(user, text_cmd, response)
+        :param bot: Bot
+        :param telegram_update: TelegramUpdate
+        :param user: TeleUser
+        :return: void
+        """
+        dates = self.fetch_dates(telegram_update.message)
+        response = super(Campaigns, self).run_api_query("getCampaigns", dates, user)
+        response = self.prepare_telegram_response(response)
 
         bot.sendMessage(telegram_update.chat_id, response)
 
     def fetch_dates(self, text_cmd):
+        """
+        Fetch start and end dates from command string
 
+        :param text_cmd: string
+        :return: dict
+        """
         date_from = datetime.today() - timedelta(days=30)
         date_from = date_from.strftime(self.DATE_FORMAT)
 
         date_to = datetime.today().strftime(self.DATE_FORMAT)
 
-        if ' ' in text_cmd:
-            parts = text_cmd.split(' ')
-            pprint.pprint(parts)
-            count = len(parts)
-            if count == 3:
-                try:
-                    date_from = datetime.strptime(parts[1] + ' 00:00:00', self.DATE_FORMAT)
-                except ValueError:
-                    date_from = datetime.today() - timedelta(days=30)
-                    date_from = date_from.strftime(self.DATE_FORMAT)
-                try:
-                    date_to = datetime.strptime(parts[2] + ' 23:59:59', self.DATE_FORMAT)
-                except ValueError:
-                    date_to = datetime.today().strftime(self.DATE_FORMAT)
-            if count == 2:
-                try:
-                    date_from = datetime.strptime(parts[1] + ' 00:00:00', self.DATE_FORMAT)
-                except ValueError:
-                    date_from = datetime.today() - timedelta(days=30)
+        args = super(Campaigns, self).parse_arguments(text_cmd)
+        count = len(args)
+        if count == 2:
+            try:
+                date_from = datetime.strptime(args[0] + ' 00:00:00', self.DATE_FORMAT)
+            except ValueError:
+                raise CmdException("Неверный формат даты \"От\"")
+            try:
+                date_to = datetime.strptime(args[1] + ' 23:59:59', self.DATE_FORMAT)
+            except ValueError:
+                raise CmdException("Неверный формат даты \"До\"")
+        if count == 1:
+            try:
+                date_from = datetime.strptime(args[0] + ' 00:00:00', self.DATE_FORMAT)
+            except ValueError:
+                raise CmdException("Неверный формат даты \"От\"")
 
         return {"from": date_from, "to": date_to}
 
 
-    def prepare_text_response(self, response):
+    def prepare_telegram_response(self, response):
+        """
+        Prepare user-readable response
+        :param response: string
+        :return: string
+        """
         response = json.loads(response)
         if "error" in response.keys():
-            return "Error: " + response['error']
+            raise CmdException(response['error'])
+
         results = response['result']
-        text_response = ""
+        if len(results) == 0:
+            return 'Кампании за данный промежуток времени не найдены'
+
         for result in results:
-            text_response += "\r\n Id: {}".format(result["id"])
-            text_response += "\r\n Subject: {}".format(result["subject"])
-            text_response += "\r\n Status: {}".format(result["status"])
-            text_response += "\r\n Show statistic: /campaignStats_{}".format(result["id"])
-            text_response += "\r\n----------"
-        return text_response
+            response = "\r\nId: {}" \
+                       "\r\nSubject: {}" \
+                       "\r\nStatus: {}" \
+                       "\r\nShow statistic: /campaignStats_{}" \
+                       "\r\n----------".format(
+                                           result["id"],
+                                           result["subject"],
+                                           result["status"],
+                                           result["id"]
+                                        )
+
+        return response
 
