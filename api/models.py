@@ -16,4 +16,4 @@ class ChatLog(models.Model):
     response = models.TextField(max_length=100)
 
     def __str__(self):
-        return self.request
+        return "Request: " + self.request + "   Response :" + self.response[:100]
