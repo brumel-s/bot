@@ -44,7 +44,7 @@ class Subscribe(BaseCommand):
         """
         args = super(Subscribe, self).parse_arguments(text_cmd)
         if len(args) < 2:
-            raise CmdException("Ошибка! Id списка или имейл")
+            raise CmdException("Ошибка! Не указан Id списка или имейл")
         try:
             list_id = int(args[0])
             if list_id <= 0:
