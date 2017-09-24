@@ -2,6 +2,7 @@ from api.uni_api import UniApi
 from api.models import ChatLog
 from api.exceptions import CmdException
 
+
 class BaseCommand():
     """
     Base command
@@ -52,6 +53,6 @@ class BaseCommand():
         """
         chat_log = ChatLog()
         chat_log.telegram_user = user
-        chat_log.request = text_request
-        chat_log.response = text_response
+        chat_log.request = text_request[:255]
+        chat_log.response = text_response[:255]
         chat_log.save()

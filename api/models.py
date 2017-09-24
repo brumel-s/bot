@@ -10,10 +10,11 @@ class TeleUser(models.Model):
     def __str__(self):
         return self.username
 
+
 class ChatLog(models.Model):
     telegram_user = models.ForeignKey(TeleUser)
-    request = models.TextField()
-    response = models.TextField(max_length=100)
+    request = models.TextField(max_length=255)
+    response = models.TextField(max_length=255)
 
     def __str__(self):
-        return "Request: " + self.request + "   Response :" + self.response[:100]
+        return "Request: " + self.request[:255] + "   Response :" + self.response[:100]

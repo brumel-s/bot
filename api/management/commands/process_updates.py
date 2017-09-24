@@ -8,8 +8,6 @@ from api.exceptions import CmdException
 
 from api.models import TeleUser
 
-TelegramBot = telepot.Bot(settings.BOT_TOCKEN)
-
 
 class Command(BaseCommand):
     """
@@ -18,11 +16,18 @@ class Command(BaseCommand):
 
     help = 'Process Telegram updates'
 
+    def __init__(self, stdout=None, stderr=None, no_color=False):
+        """
+        Init Bot
+        """
+        super(Command, self).__init__(stdout, stderr, no_color)
+        self.telegram_bot = telepot.Bot(settings.BOT_TOCKEN)
+
     def handle(self, *args, **options):
         """
         Handle telegram updates
         """
-        TelegramBot.message_loop(self.process_updates)
+        self.telegram_bot.message_loop(self.process_updates)
         while 1:
             time.sleep(10)
 
@@ -40,17 +45,17 @@ class Command(BaseCommand):
             cmd = cmd_factory.create_cmd(update, user)
 
             if cmd is not None:
-                cmd.run(TelegramBot, update, user)
+                cmd.run(self.telegram_bot, update, user)
                 return
 
             raise CmdException('Команда не найдена')
 
         except CmdException as e:
-            TelegramBot.sendMessage(update.chat_id, e.args[0])
+            self.telegram_bot.sendMessage(update.chat_id, e.args[0])
         except Exception:
             log = logging.getLogger("bot_log")
             log.exception('Error on run command')
-            TelegramBot.sendMessage(update.chat_id, "Во время выполнения запроса произошла ошибка")
+            self.telegram_bot.sendMessage(update.chat_id, "Во время выполнения запроса произошла ошибка")
 
         return
 
