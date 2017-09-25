@@ -3,7 +3,7 @@ from api.models import ChatLog
 from api.exceptions import CmdException
 
 
-class BaseCommand():
+class BaseCommand(object):
     """
     Base command
     """
