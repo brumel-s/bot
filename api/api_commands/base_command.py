@@ -46,7 +46,7 @@ class BaseCommand(object):
         """
         Log request and response
 
-        :param user: TeleUesr
+        :param user: TeleUser
         :param text_request: string
         :param text_response: string
         :return: void
