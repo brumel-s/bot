@@ -34,7 +34,7 @@ class CommandFactory:
         :param user: Teleuser
         :return: BaseCommand|None
         """
-        if update.message.startswith(SetApiKey.CMD_NAME):
+        if update.phone is None and update.message.startswith(SetApiKey.CMD_NAME):
             return SetApiKey()
 
         if update.phone is None and not user.phone and not user.uni_api_key:
