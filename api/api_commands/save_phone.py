@@ -25,7 +25,7 @@ class SavePhone(BaseCommand):
         if "error" in phoneResponse.keys():
             error = "Во время выполнения запроса произошла ошибка: {}" \
                     "\r\nУстановите API ключ с помощью команды:" \
-                    "\r\n/setApiKye {}".format(phoneResponse['error'], '{ApiKey}')
+                    "\r\n/setApiKey {}".format(phoneResponse['error'], '{ApiKey}')
             error += ""
             error += ""
             raise CmdException(error)

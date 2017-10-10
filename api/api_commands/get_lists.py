@@ -49,7 +49,7 @@ class GetLists(BaseCommand):
         for result in results:
             text_response += "\r\nId: {}, Title: {}" \
                              "\r\n----------".format(result["id"], result["title"])
-        text_response += "\r\nИспользуйте /subscribe {listId} {email} для добавления имейла в список"
+        text_response += "\r\nИспользуйте /subscribe {listId} {email} для добавления email-адреса в список"
 
         return text_response
 

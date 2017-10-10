@@ -43,7 +43,7 @@ class SetApiKey(BaseCommand):
         """
         args = super(SetApiKey, self).parse_arguments(text_cmd)
         if len(args) < 1:
-            raise CmdException("Ошбика! API ключ является обазязательным аргументом")
+            raise CmdException("Ошибка! API ключ является обазязательным аргументом")
 
         return args[0]
 
