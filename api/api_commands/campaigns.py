@@ -84,8 +84,9 @@ class Campaigns(BaseCommand):
         if len(results) == 0:
             return 'Кампании за данный промежуток времени не найдены'
 
+        response = ''
         for result in results:
-            response = "\r\nId: {}" \
+            response += "\r\nId: {}" \
                        "\r\nSubject: {}" \
                        "\r\nStatus: {}" \
                        "\r\nShow statistic: /campaignStats_{}" \
