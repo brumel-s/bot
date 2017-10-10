@@ -67,7 +67,7 @@ class Campaigns(BaseCommand):
             except ValueError:
                 raise CmdException("Неверный формат даты \"От\"")
 
-        return {"from": date_from, "to": date_to}
+        return {"from": date_from, "to": date_to, "limit": 50}
 
 
     def prepare_telegram_response(self, response):
