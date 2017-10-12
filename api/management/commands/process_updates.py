@@ -4,7 +4,8 @@ import telepot, time, sys, logging, pprint
 from api.command_factory import CommandFactory
 from api.telegram_update import TelegramUpdate
 from api.exceptions import CmdException
-
+import django.db
+from django.db.utils import OperationalError
 
 from api.models import TeleUser
 
@@ -52,6 +53,11 @@ class Command(BaseCommand):
 
         except CmdException as e:
             self.telegram_bot.sendMessage(update.chat_id, e.args[0])
+        except OperationalError:
+            log = logging.getLogger("bot_log")
+            log.exception('Mysql error. Try to re-connect')
+            django.db.close_old_connections()
+            self.telegram_bot.sendMessage(update.chat_id, "Во время выполнения запроса произошла ошибка. Попробуйте повторитьзапрос.")
         except Exception:
             log = logging.getLogger("bot_log")
             log.exception('Error on run command')
