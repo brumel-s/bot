@@ -57,7 +57,7 @@ class Command(BaseCommand):
             log = logging.getLogger("bot_log")
             log.exception('Mysql error. Try to re-connect')
             django.db.close_old_connections()
-            self.telegram_bot.sendMessage(update.chat_id, "Во время выполнения запроса произошла ошибка. Попробуйте повторитьзапрос.")
+            self.telegram_bot.sendMessage(update.chat_id, "Во время выполнения запроса произошла ошибка. Попробуйте повторить запрос.")
         except Exception:
             log = logging.getLogger("bot_log")
             log.exception('Error on run command')
