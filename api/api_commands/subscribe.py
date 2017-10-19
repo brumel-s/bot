@@ -44,7 +44,7 @@ class Subscribe(BaseCommand):
         """
         args = super(Subscribe, self).parse_arguments(text_cmd)
         if len(args) < 2:
-            raise CmdException("Ошибка! Не указан Id списка или имейл")
+            raise CmdException("Ошибка! Не указан Id списка или email")
         try:
             list_id = int(args[0])
             if list_id <= 0:
@@ -64,7 +64,7 @@ class Subscribe(BaseCommand):
         if "error" in response.keys():
             raise CmdException(response['error'])
         if "result" not in response.keys():
-            raise CmdException("При добавлении имейла произошла ошибка")
+            raise CmdException("При добавлении email произошла ошибка")
 
-        return "Имейл добавлен в список"
+        return "Email добавлен в список"
 
